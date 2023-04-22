@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Connections;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Buffers;
+using System.IO.Pipelines;
 using System.Threading.Tasks;
 
 namespace KestrelTcp.EchoServer
@@ -19,18 +22,16 @@ namespace KestrelTcp.EchoServer
 
             while (true)
             {
-                var result = await connection.Transport.Input.ReadAsync();
-                var buffer = result.Buffer;
+                ReadResult result = await connection.Transport.Input.ReadAsync();
+                ReadOnlySequence<byte> buffer = result.Buffer;
 
-                foreach (var segment in buffer)
+                foreach (ReadOnlyMemory<byte> segment in buffer)
                 {
                     await connection.Transport.Output.WriteAsync(segment);
                 }
 
                 if (result.IsCompleted)
-                {
                     break;
-                }
 
                 connection.Transport.Input.AdvanceTo(buffer.End);
             }

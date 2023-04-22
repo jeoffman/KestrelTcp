@@ -1,17 +1,15 @@
 ﻿using KestrelTcp.EchoServer;
-using KestrelTcp.MessageServer;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics;
 using System.Net;
-using System.Threading.Tasks;
 
-namespace KestrelTcp
+namespace ConsoleApp60
 {
-    public class Program
+    class Program
     {
         public static void Main(string[] args)
         {
@@ -39,20 +37,19 @@ namespace KestrelTcp
         {
         }
 
-        // There is no HTTP request pipeline, so who is going to use this?
+        // There is no HTTP request pipeline, so who is going to use this? Ah, its a kestrel thing
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            Debugger.Break();
             if (env.IsDevelopment())
             {
-                //app.UseDeveloperExceptionPage();
+                app.UseDeveloperExceptionPage();
             }
 
-            app.Run((context) =>
+            app.Run(async (context) =>
             {
-                return Task.CompletedTask;
-                //await context.Response.WriteAsync("Hello World!");
+                await context.Response.WriteAsync("Hello World!");
             });
         }
     }
+
 }

@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Options;
 using System;
+using System.Buffers;
+using System.IO.Pipelines;
 using System.Threading.Tasks;
 
 namespace KestrelTcp.MessageServer
 {
-
     public class MessageOptionsSetup : IConfigureOptions<KestrelServerOptions>
     {
         private readonly MessageHandlerOptions _options;
@@ -35,16 +36,16 @@ namespace KestrelTcp.MessageServer
 
             public override async Task OnConnectedAsync(ConnectionContext connection)
             {
-                
-                var input = connection.Transport.Input;
+
+                PipeReader input = connection.Transport.Input;
 
                 // Code to parse messages
                 while (true)
                 {
-                    var result = await input.ReadAsync();
-                    var buffer = result.Buffer;
+                    ReadResult result = await input.ReadAsync();
+                    ReadOnlySequence<byte> buffer = result.Buffer;
 
-                    if (_parser.TryParseMessage(ref buffer, out var message))
+                    if (_parser.TryParseMessage(ref buffer, out Message message))
                     {
                         await ProcessMessageAsync(message);
                     }
@@ -55,6 +56,7 @@ namespace KestrelTcp.MessageServer
 
             private Task ProcessMessageAsync(Message message)
             {
+                return Task.CompletedTask;
                 throw new NotImplementedException();
             }
         }
